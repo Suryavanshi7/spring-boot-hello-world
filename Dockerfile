@@ -5,6 +5,6 @@ WORKDIR /app
  
 COPY target/spring-boot-2-hello-world-1.0.2-SNAPSHOT.jar /app/helloworld-java.jar
  
-EXPOSE 8088
+EXPOSE 8087
  
 ENTRYPOINT ["java", "-jar", "/app/helloworld-java.jar"]
