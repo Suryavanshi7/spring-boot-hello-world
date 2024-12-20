@@ -11,15 +11,22 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        // stage('Checkout Code') {
+        //     steps {
+        //         script {
+        //             // Clone the repository and checkout the correct branch based on the parameter
+        //             sh "git clone https://github.com/Suryavanshi7/spring-boot-hello-world.git app"
+        //             dir('app') {
+        //                 sh "git checkout ${params.Environment}"
+        //             }
+        //         }
+        //    }
+        // }
+
+        stage('Checkout') {
             steps {
-                script {
-                    // Clone the repository and checkout the correct branch based on the parameter
-                    sh "git clone https://github.com/Suryavanshi7/spring-boot-hello-world.git app"
-                    dir('app') {
-                        sh "git checkout ${params.Environment}"
-                    }
-                }
+                // Checkout source code
+                checkout scm
             }
         }
         
