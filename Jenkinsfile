@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'wsl' }
 
     parameters {
         choice(name: 'Environment', choices: ['Dev', 'Prod'], description: 'Select the deployment environment')
