@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'wsl' }
+    agent any
 
     parameters {
         choice(name: 'Environment', choices: ['Dev', 'Prod'], description: 'Select the deployment environment')
@@ -11,22 +11,21 @@ pipeline {
     }
 
     stages {
-        // stage('Checkout Code') {
-        //     steps {
-        //         script {
-        //             // Clone the repository and checkout the correct branch based on the parameter
-        //             sh "git clone https://github.com/Suryavanshi7/spring-boot-hello-world.git app"
-        //             dir('app') {
-        //                 sh "git checkout ${params.Environment}"
-        //             }
-        //         }
-        //    }
-        // }
-
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                // Checkout source code
-                checkout scm
+                cleanWs()
+            }
+        }
+        
+        stage('Checkout Code') {
+            steps {
+                script {
+                    // Clone the repository and checkout the correct branch based on the parameter
+                    sh "git clone https://github.com/Suryavanshi7/spring-boot-hello-world.git app"
+                    dir('app') {
+                        sh "git checkout ${params.Environment}"
+                    }
+                }
             }
         }
         
@@ -40,17 +39,19 @@ pipeline {
             }
         }
         
-        // stage('Push to Artifactory') {
-        //     steps {
-        //         script {
-        //             // Push artifact to Artifactory
-        //             dir('app') {
-        //                   sh 'curl -u Surya:Password7 -T target/*.jar "http://localhost:8081/artifactory/Jenkins/"'
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Code Analysis') {
+            steps {
+          withSonarQubeEnv(credentialsId: 'sonarqube', installationName: 'SonarQube') { 
+        dir('app'){
+            sh "mvn clean verify -DskipTests sonar:sonar -Dsonar.projectKey=java-app -Dsonar.projectName='java-app'"
+        }
+      
+    }
+  
+            }
+        }
         
+       
         stage('Push to Artifactory') {
             steps {
                 script {
@@ -88,5 +89,15 @@ pipeline {
             }
         }
     }
-
+    post {
+            always {
+                script {
+                    emailext (
+                        subject: "Jenkins Job - ${JOB_NAME} [${currentBuild.currentResult}]",
+                         body: "Build ${BUILD_NUMBER} for job ${JOB_NAME} is ${currentBuild.currentResult}.\nEnvironment: ${params.Environment}\nLogs: ${BUILD_URL}",
+                        to: 'aayein08@gmail.com'
+                    )
+                }
+            }
+        }
 }
